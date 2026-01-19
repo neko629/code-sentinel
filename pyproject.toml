@@ -14,7 +14,9 @@ dependencies = [
     "langchain-openai (>=1.1.7,<2.0.0)",
     "langgraph (>=1.0.6,<2.0.0)",
     "pydantic (>=2.12.5,<3.0.0)",
-    "httpx (>=0.28.1,<0.29.0)"
+    "httpx (>=0.28.1,<0.29.0)",
+    "dotenv (>=0.9.9,<0.10.0)",
+    "langchain-deepseek (>=1.0.1,<2.0.0)"
 ]
 
 
@@ -44,8 +46,14 @@ target-version = "py313"
 # B: flake8-bugbear (发现潜在 bug)
 select = ["E", "W", "F", "I", "B"]
 
-# 忽略某些规则 (如果需要)
-ignore = []
+# 忽略一些过于严苛的规则
+# D100: 忽略模块顶层这就必须有文档
+# D104: 忽略 __init__.py 必须有文档
+ignore = ["D100", "D104"]
 
 [tool.ruff.format]
 quote-style = "double"
+
+[tool.ruff.lint.pydocstyle]
+# 强制使用 Google 风格
+convention = "google"
