@@ -1,40 +1,23 @@
-import os
+import logging
 
-from dotenv import load_dotenv
+from fastapi import FastAPI
 
-from code_sentinel.core.review_service import review_service
+from code_sentinel.api.review_controller import router as review_router
 
-# 加载环境变量
-load_dotenv()
+logging.basicConfig(level=logging.INFO)
 
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title="CodeSentinel API",
+        description="Code Sentinel API",
+        version="0.1.0"
+    )
 
-def test_llm_layer():
-    print(">>> 正在初始化 AI 审查员...")
+    app.include_router(review_router, prefix="/api/v1", tags=["review"])
+    return app
 
-    # 模拟一段很烂的 Java 代码 Diff
-    bad_java_code = """
-    + public class UserController {
-    +     public User getUser(String id) {
-    +         // TODO: fix later
-    +         String sql = "SELECT * FROM users WHERE id = '" + id + "'";
-    +         return db.query(sql);
-    +     }
-    + }
-    """
-
-    print(">>> 发送代码给 AI (Provider: {})...".format(os.getenv("LLM_PROVIDER")))
-
-    try:
-        # 调用服务
-        result = review_service.review_code(language="Java", code_diff=bad_java_code)
-
-        print("\n=== AI 审查意见 ===")
-        print(result)
-        print("===================")
-
-    except Exception as e:
-        print(f"❌ 调用失败: {e}")
-
+app = create_app()
 
 if __name__ == "__main__":
-    test_llm_layer()
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
