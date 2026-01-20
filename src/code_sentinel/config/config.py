@@ -12,6 +12,9 @@ OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL")
 # graph config
 LANGSMITH_API_KEY = os.getenv("LANGSMITH_API_KEY")
 
+GIT_WEBHOOK_SECRET = os.getenv("GIT_WEBHOOK_SECRET")
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+
 if __name__ == "__main__":
     print(f"DEEPSEEK_API_KEY: {DEEPSEEK_API_KEY}")
     print(f"OPENROUTER_API_KEY: {OPENROUTER_API_KEY}")
