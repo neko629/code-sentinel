@@ -32,7 +32,7 @@ async def process_pr_event(payload: dict):
             diff_content = (diff_content[:10000]
                             + "\n\n... Diff truncated due to size ...\n\n")
         # call review service
-        ai_comment = review_service.review_code("Python", diff_content)
+        ai_comment = await review_service.review_code_async(diff_content, language='Python')
         # post review comment
         git_service.post_comment(repo_name, pr_number, ai_comment)
         logger.info(f"finish to process PR event: "

@@ -34,7 +34,7 @@ def security_node(state: ReviewState):
     print("\n\n>>>>Executing security node...")
     return {"security_comments": _call_agent(SECURITY_PROMPT, state)}
 
-def performace_node(state: ReviewState):
+def performance_node(state: ReviewState):
     """comments from  performance agent"""
     print("\n\n>>>>Executing performance node...")
     return {"performance_comments": _call_agent(PERFORMANCE_PROMPT, state)}

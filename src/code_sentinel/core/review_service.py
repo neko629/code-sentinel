@@ -2,6 +2,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
 from code_sentinel.core.llm_factory import llm_service
+from code_sentinel.agents.workflow import app as graph_app
 
 
 class ReviewService:
@@ -34,6 +35,18 @@ class ReviewService:
         """review code diff and return suggestions"""
         response = self.chain.invoke({"language": language, "code_diff": code_diff})
         return response
+
+    async def review_code_async(self, code_diff: str, language: str = 'python') -> str:
+        """call agent asynchronously"""
+        inputs = {
+            "diff_content": code_diff,
+            "language": language,
+            "security_comments": [],
+            "performance_comments": [],
+            "style_comments": []
+        }
+        result = await graph_app.ainvoke(inputs)
+        return result.get("final_report", "Review generation failed!")
 
 
 review_service = ReviewService()
