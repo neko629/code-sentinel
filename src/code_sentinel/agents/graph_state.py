@@ -15,6 +15,8 @@ class ReviewState(TypedDict):
     # related code snippets retrieved from knowledge base
     repo_context: Optional[str]
 
+    style_check_tool_result: Optional[str]
+
     security_comments: Annotated[List[str], operator.add]
     performance_comments: Annotated[List[str], operator.add]
     style_comments: Annotated[List[str], operator.add]

@@ -4,7 +4,8 @@ from langchain_core.output_parsers import StrOutputParser
 
 from code_sentinel.agents.graph_state import ReviewState
 from code_sentinel.core.llm_factory import llm_service
-from code_sentinel.agents.tools import retrieve_related_code
+from code_sentinel.agents.tools import retrieve_related_code, run_java_lint
+from code_sentinel.core.database import get_similar_mistakes
 from code_sentinel.agents.prompts import (
     SECURITY_PROMPT, PERFORMANCE_PROMPT, STYLE_PROMPT, SUMMARY_PROMPT
 )
@@ -15,19 +16,22 @@ def _call_agent(system_prompt: str, state: ReviewState) -> List[str]:
     lang = state["language"]
 
     context = state.get("repo_context", "")
+    style_check_tool_result = state.get("style_check_tool_result", "No issues found")
+
+    mistakes_context = get_similar_mistakes()
 
     if not context:
         context = "No additional context available."
 
     # build prompt
     prompt = ChatPromptTemplate.from_messages([
-        ("system", system_prompt),
-        ("human", "请审查以下代码变更 (Diff):\n\n{diff}\n\n代码语言: {lang},\n相关上下文:{context}"),
+        ("system", system_prompt + f"\n\n以下是你错误判断过的内容:\n{mistakes_context}, 请参考这些内容，避免重复错误。"),
+        ("human", "请审查以下代码变更 (Diff):\n\n{diff}\n\n代码语言: {lang},\n相关上下文:{context}, \n风格检查工具检查结果:{style_check_tool_result}"),
     ])
 
     # build a chain
     chain = prompt | llm_service | StrOutputParser()
-    responses = chain.invoke({"diff": diff, "lang": lang, "context": context})
+    responses = chain.invoke({"diff": diff, "lang": lang, "context": context, "style_check_tool_result": style_check_tool_result})
 
     # if no comments, return null list
     # if len(responses) < 20:
@@ -70,6 +74,14 @@ def performance_node(state: ReviewState):
 def style_node(state: ReviewState):
     """comments from  code style agent"""
     print("\n\n>>>>Executing style node...")
+    # llm_service_with_tools = llm_service.bind_tools([run_java_lint])
+    diff = state["diff_content"]
+    language = state["language"]
+    lint_report = "[CheckStyle] No issues found."
+    if language == 'Java':
+        lint_report = run_java_lint.invoke(diff)
+    state["style_check_tool_result"] = lint_report
+
     return {"style_comments": _call_agent(STYLE_PROMPT, state)}
 
 def summary_node(state: ReviewState):

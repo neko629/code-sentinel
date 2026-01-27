@@ -5,9 +5,41 @@ from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Request
 from code_sentinel.core.git_service import git_service
 from code_sentinel.core.review_service import review_service
 from code_sentinel.utils.crypto_utils import verify_signature
+from code_sentinel.core.database import add_feedback
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+async def process_comment_event(payload: dict):
+    """
+    handle user feedback
+    :param payload:
+    :return:
+    """
+    comment = payload.get("comment", {})
+    body = comment.get("body", "").lower()
+
+    triggers = [
+        "false positive",
+        "wrong",
+        "误报"
+    ]
+
+    if not any(t in body for t in triggers):
+        return
+
+    logger.info(">>>> [User Feedback] 收到用户反馈, 正在记录...")
+
+    diff_hunk = comment.get("diff_hunk", "")
+    path = comment.get("path", "")
+
+    add_feedback(
+        file_path=path,
+        code=diff_hunk,
+        comment="AI Previous Comment", # TODO: get ai comment by github API
+        feedback=body
+    )
+    logger.info(">>>> [User Feedback] 反馈记录完成.")
 
 async def process_pr_event(payload: dict):
     """
@@ -64,6 +96,8 @@ async def handle_github_webhook(
     if event_type == "pull_request" and action in ["opened", "synchronize"]:
         logger.info(f"receive pr event, type: {action}")
         background_tasks.add_task(process_pr_event, payload)
+    elif event_type == "pull_request_review_comment" and payload.get("action") == "created":
+        background_tasks.add_task(process_comment_event, payload)
     else:
         logger.info(f"ignore event type: {event_type}, action: {action}")
 
