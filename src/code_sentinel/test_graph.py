@@ -6,6 +6,7 @@ print(app.get_graph().draw_mermaid())
 
 print(">>> start to run workflow")
 bad_code = """
++ class graphState
 + public User login(String name, String pass) {
 +     String sql = "SELECT * FROM user WHERE name='" + name + "'";
 +     System.out.println("Debug: " + sql);

@@ -5,7 +5,8 @@ from code_sentinel.agents.nodes import (
     security_node,
     performance_node,
     style_node,
-    summary_node
+    summary_node,
+    retrieve_context_node
 )
 
 def route_diff(state: ReviewState):
@@ -23,12 +24,24 @@ workflow.add_node("security_agent", security_node)
 workflow.add_node("performance_agent", performance_node)
 workflow.add_node("style_agent", style_node)
 workflow.add_node("summary_agent", summary_node)
+workflow.add_node("retrieve_node", retrieve_context_node)
 
-# 3 set edges
+workflow.add_edge(START, "retrieve_node")
 
-workflow.set_conditional_entry_point(
-    route_diff
+workflow.add_conditional_edges(
+    "retrieve_node",
+    route_diff,
+    {
+        "security_agent": "security_agent",
+        "performance_agent": "performance_agent",
+        "style_agent": "style_agent",
+        END: END
+    }
 )
+
+workflow.add_edge("retrieve_node", "security_agent")
+workflow.add_edge("retrieve_node", "performance_agent")
+workflow.add_edge("retrieve_node", "style_agent")
 
 workflow.add_edge("security_agent", "summary_agent")
 workflow.add_edge("performance_agent", "summary_agent")
