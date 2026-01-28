@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  code-sentinel:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      # 持久化向量数据库
+      - ./chroma_db:/app/chroma_db
+      # 持久化错题本 (SQLite)
+      - ./feedback_memory.db:/app/feedback_memory.db
+    env_file:
+      - .env
