@@ -2,6 +2,8 @@
 
 **Code Sentinel** is an AI-powered code review agent designed to automate and enhance the code review process, particularly for Pull Requests. It leverages advanced Large Language Models (LLMs) and Retrieval-Augmented Generation (RAG) to provide intelligent feedback, integrate seamlessly with Git platforms like GitHub, and capture user feedback for continuous improvement.
 
+See [Design and Improvements](docs/design-process.md) for the project's design process, Agent workflow, engineering decisions, and current limitations.
+
 ## Features
 
 *   **AI-Powered Code Reviews**: Automatically review code changes in pull requests using state-of-the-art LLMs.
